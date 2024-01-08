@@ -19,8 +19,14 @@ class User {
     const hashed_password = await bcrypt(password, BCRYPT_WORK_FACTOR);
 
     const results = await db.query(
-      `INSERT INTO users (username, password, first_name, last_name, phone, join_at)
-      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+      `INSERT INTO users (username,
+                          password,
+                          first_name,
+                          last_name,
+                          phone,
+                          join_at)
+      VALUES
+        ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
       RETURNING username, password, first_name, last_name, phone`,
       [username, hashed_password, first_name, last_name, phone]
     );
@@ -28,8 +34,6 @@ class User {
     const user = results.rows[0];
 
     return user;
-
-    // TODO: how to test this?
   }
 
   /** Authenticate: is username/password valid? Returns boolean. */
@@ -37,8 +41,9 @@ class User {
   static async authenticate(username, password) {
 
     const result = await db.query(
-      `SELECT username FROM users
-      WHERE username = $1`,
+      `SELECT username
+        FROM users
+        WHERE username = $1`,
       [username]
     );
 
@@ -59,8 +64,9 @@ class User {
   static async updateLoginTimestamp(username) {
 
     const result = await db.query(
-      `SELECT username FROM users
-      WHERE username = $1`,
+      `SELECT username
+        FROM users
+        WHERE username = $1`,
       [username]
     );
 
@@ -73,6 +79,8 @@ class User {
            WHERE username = $1
            RETURNING username, last_login_at`,
         [username]);
+    } else {
+      throw new NotFoundError('user not found');
     }
   }
 
@@ -101,7 +109,12 @@ class User {
   static async get(username) {
 
     const result = db.query(`
-          SELECT username, first_name, last_name, phone, join_at, last_login_at
+          SELECT username,
+                  first_name,
+                  last_name,
+                  phone,
+                  join_at,
+                  last_login_at
           FROM users
           WHERE username = $1`,
           [username]
@@ -125,6 +138,34 @@ class User {
    */
 
   static async messagesFrom(username) {
+
+  const results = await db.query(`
+  SELECT m.id,
+          u.username,
+          u.first_name,
+          u.last_name,
+          u.phone,
+          m.body,
+          m.sent_at,
+          m.read_at
+    FROM messages AS m
+      INNER JOIN users AS u ON m.to_username = u.username
+    WHERE m.from_username = $1`,
+    [username]);
+
+    return results.rows.map(m => { return {
+      id: m.id,
+      to_user: {
+        username: u.username,
+        first_name: u.first_name,
+        last_name: u.last_name,
+        phone: u.phone,
+      },
+      body: m.body,
+      sent_at: m.sent_at,
+      read_at: m.read_at
+    }});
+
   }
 
   /** Return messages to this user.
@@ -136,6 +177,32 @@ class User {
    */
 
   static async messagesTo(username) {
+    const results = await db.query(`
+    SELECT m.id,
+            u.username,
+            u.first_name,
+            u.last_name,
+            u.phone,
+            m.body,
+            m.sent_at,
+            m.read_at
+      FROM messages AS m
+        INNER JOIN users AS u ON m.from_username = u.username
+      WHERE m.to_username = $1`,
+      [username]);
+
+      return results.rows.map(m => { return {
+        id: m.id,
+        to_user: {
+          username: u.username,
+          first_name: u.first_name,
+          last_name: u.last_name,
+          phone: u.phone,
+        },
+        body: m.body,
+        sent_at: m.sent_at,
+        read_at: m.read_at
+      }});
   }
 }
 
