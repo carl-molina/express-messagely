@@ -14,9 +14,9 @@ class User {
    *    {username, password, first_name, last_name, phone}
    */
 
-  static async register(username, password, first_name, last_name, phone) {
+  static async register({username, password, first_name, last_name, phone}) {
 
-    const hashed_password = await bcrypt(password, BCRYPT_WORK_FACTOR);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
 
     const results = await db.query(
       `INSERT INTO users (username,
@@ -28,7 +28,7 @@ class User {
       VALUES
         ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
       RETURNING username, password, first_name, last_name, phone`,
-      [username, hashed_password, first_name, last_name, phone]
+      [username, hashedPassword, first_name, last_name, phone]
     );
 
     const user = results.rows[0];
@@ -41,17 +41,17 @@ class User {
   static async authenticate(username, password) {
 
     const result = await db.query(
-      `SELECT username
+      `SELECT username, password
         FROM users
         WHERE username = $1`,
       [username]
     );
 
     const user = result.rows[0];
+    console.log('This is user', user);
 
     if (user) {
-      if (await brypt.compare(password, user.password) === true) {
-
+      if (await bcrypt.compare(password, user.password) === true) {
         return true;
       }
     }
@@ -89,7 +89,7 @@ class User {
 
   static async all() {
 
-    const results = db.query(`
+    const results = await db.query(`
           SELECT username, first_name, last_name
           FROM users
     `);
@@ -108,7 +108,7 @@ class User {
 
   static async get(username) {
 
-    const result = db.query(`
+    const result = await db.query(`
           SELECT username,
                   first_name,
                   last_name,
@@ -153,13 +153,15 @@ class User {
     WHERE m.from_username = $1`,
     [username]);
 
+    console.log('results.rows[0]:', results.rows[0]);
+
     return results.rows.map(m => { return {
       id: m.id,
       to_user: {
-        username: u.username,
-        first_name: u.first_name,
-        last_name: u.last_name,
-        phone: u.phone,
+        username: m.username,
+        first_name: m.first_name,
+        last_name: m.last_name,
+        phone: m.phone,
       },
       body: m.body,
       sent_at: m.sent_at,
@@ -193,11 +195,11 @@ class User {
 
       return results.rows.map(m => { return {
         id: m.id,
-        to_user: {
-          username: u.username,
-          first_name: u.first_name,
-          last_name: u.last_name,
-          phone: u.phone,
+        from_user: {
+          username: m.username,
+          first_name: m.first_name,
+          last_name: m.last_name,
+          phone: m.phone,
         },
         body: m.body,
         sent_at: m.sent_at,
