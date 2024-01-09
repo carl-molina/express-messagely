@@ -18,12 +18,20 @@ const { UnauthorizedError, NotFoundError } = require("../expressError");
  * Makes sure that the currently-logged-in users is either the to or from user.
  **/
 
-router.get('/:id', ensureLoggedIn, ensureCorrectUser, async function (req, res) {
+router.get('/:id', ensureLoggedIn, async function (req, res) {
 
   const currUser = res.locals.user;
   const message = await Message.get(req.params.id);
 
-  if (message.from_user.username !== currUser.username ||
+  console.log('currUser.username:', currUser.username);
+  console.log('message.to_user.username', message.to_user.username);
+
+  // if (message.from_user.username !== currUser.username ||
+  //   message.to_user.username !== message.to_user.username) {
+  //     throw new UnauthorizedError('User not from_user or to_user');
+  //   }
+
+  if (message.from_user.username !== currUser.username &&
     message.to_user.username !== currUser.username) {
       throw new UnauthorizedError('User not from_user or to_user');
     }
@@ -68,7 +76,7 @@ router.post('/', ensureLoggedIn, async function(req, res) {
  *
  **/
 
-router.post('/:id/read', ensureLoggedIn, ensureCorrectUser, async function(req, res){
+router.post('/:id/read', ensureLoggedIn, async function(req, res){
 
   const currUser = res.locals.user;
   const message = await Message.get(req.params.id);
