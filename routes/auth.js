@@ -16,7 +16,7 @@ router.post('/login', async function (req,res){
   if (req.body === undefined) throw new BadRequestError();
   const {username, password} = req.body;
 
-  const user = User.authenticate(username, password);
+  const user = await User.authenticate(username, password);
 
   if (!user) {
     throw new UnauthorizedError('invalid username or password');
@@ -38,7 +38,7 @@ router.post('/register', async function (req, res){
   if (req.body === undefined) throw new BadRequestError();
   const {username, password, first_name, last_name, phone} = req.body;
 
-  const newUser = User.register(username, password, first_name, last_name, phone);
+  const newUser = await User.register(username, password, first_name, last_name, phone);
 
   return jwt.sign(newUser, SECRET_KEY, JWT_OPTIONS);
 })
