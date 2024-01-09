@@ -46,7 +46,7 @@ router.post('/register', async function (req, res){
                                         last_name,
                                         phone});
 
-  const token = jwt.sign(newUser, SECRET_KEY, JWT_OPTIONS);
+  const token = jwt.sign({username: newUser.username}, SECRET_KEY);
 
   return res.json({ token });
 })
