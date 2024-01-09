@@ -12,6 +12,8 @@ class User {
 
   /** Register new user. Returns
    *    {username, password, first_name, last_name, phone}
+   *  // TODO: needs to tell what function takes in
+   *  // 'takes' and 'returns'
    */
 
   static async register({username, password, first_name, last_name, phone}) {
@@ -72,6 +74,7 @@ class User {
     );
 
     const user = result.rows[0];
+    // TODO: don't need to check for user
 
     if (user) {
       await db.query(
@@ -82,6 +85,7 @@ class User {
         [username]);
     } else {
       throw new NotFoundError('user not found');
+      // can check for empty row instead of having extra query for user
     }
   }
 
@@ -126,7 +130,7 @@ class User {
     if (user){
       return user;
     }
-
+// TODO: consider swapping conditionals here; have return user at the bottom
     throw new NotFoundError('user not found');
   }
 
@@ -169,6 +173,9 @@ class User {
       read_at: m.read_at
     }});
 
+
+    // TODO: what happens if user doesn't exist? Have check here
+    // TODO: what happens if no messages?
   }
 
   /** Return messages to this user.
