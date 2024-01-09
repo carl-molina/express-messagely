@@ -52,12 +52,11 @@ async function ensureCorrectRecipient(req, res, next) {
 
   const message = await Message.get(req.params.id);
 
-  if (currentUser.username !== message.to_username) {
+  if (currentUser.username !== message.to_username ||
+    currentUser.username !== message.from_username) {
     throw new UnauthorizedError();
   }
-
   return next();
-
 }
 
 

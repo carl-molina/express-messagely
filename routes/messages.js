@@ -20,10 +20,6 @@ const { ensureCorrectUser, ensureCorrectRecipient } = require('../middleware/aut
 
 router.get('/:id', ensureCorrectUser, ensureCorrectRecipient, async function (req, res) {
 
-
-
-  // TODO: check that logged-in user is either from or to for message.
-
   const message = await Message.get(req.params.id);
   return res.json({ message });
 })
@@ -35,6 +31,7 @@ router.get('/:id', ensureCorrectUser, ensureCorrectRecipient, async function (re
  *   {message: {id, from_username, to_username, body, sent_at}}
  *
  **/
+
 
 
 /** POST/:id/read - mark message as read:
