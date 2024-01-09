@@ -3,7 +3,8 @@
 const Router = require("express").Router;
 const router = new Router();
 const Message= require('../models/message');
-const { ensureLoggedIn, ensureCorrectUser, ensureCorrectRecipient } = require('../middleware/auth');
+const { ensureLoggedIn, ensureCorrectUser, ensureCorrectRecipient } =
+require('../middleware/auth');
 const { UnauthorizedError, NotFoundError } = require("../expressError");
 
 /** GET /:id - get detail of message.
@@ -26,11 +27,6 @@ router.get('/:id', ensureLoggedIn, async function (req, res) {
   console.log('currUser.username:', currUser.username);
   console.log('message.to_user.username', message.to_user.username);
 
-  // if (message.from_user.username !== currUser.username ||
-  //   message.to_user.username !== message.to_user.username) {
-  //     throw new UnauthorizedError('User not from_user or to_user');
-  //   }
-
   if (message.from_user.username !== currUser.username &&
     message.to_user.username !== currUser.username) {
       throw new UnauthorizedError('User not from_user or to_user');
@@ -52,7 +48,9 @@ router.post('/', ensureLoggedIn, async function(req, res) {
   const from_username = res.locals.user.username;
   const { to_username, body } = req.body;
 
-  console.log('from_username=', from_username, 'to_username=,', to_username, "body=",body)
+  console.log('from_username=', from_username,
+  'to_username=,', to_username,
+  "body=",body)
 
 
   let message;
@@ -79,15 +77,15 @@ router.post('/', ensureLoggedIn, async function(req, res) {
 router.post('/:id/read', ensureLoggedIn, async function(req, res){
 
   const currUser = res.locals.user;
-  const message = await Message.get(req.params.id);
+  const unreadMessage = await Message.get(req.params.id);
 
-  if (message.to_user.username !== currUser.username) {
+  if (unreadMessage.to_user.username !== currUser.username) {
     throw new UnauthorizedError('Cannot mark message as read.');
   }
 
-  await Message.markRead(message.id);
+  const readMessage = await Message.markRead(unreadMessage.id);
 
-  return res.json({ message });
+  return res.json({ message: readMessage });
 
 })
 
