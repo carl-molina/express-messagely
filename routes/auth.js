@@ -17,8 +17,10 @@ router.post('/login', async function (req,res){
   const {username, password} = req.body;
 
   const user = await User.authenticate(username, password);
+  // TODO: ^ without await, a promise is still truthy here
 
   if (!user) {
+    // TODO: be more specific in conditional (user !== true)
     throw new UnauthorizedError('invalid username or password');
   }
 

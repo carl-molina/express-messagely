@@ -30,6 +30,7 @@ router.get('/:id', ensureLoggedIn, async function (req, res) {
   if (message.from_user.username !== currUser.username &&
     message.to_user.username !== currUser.username) {
       throw new UnauthorizedError('User not from_user or to_user');
+      // TODO: don't be as specific in error message, try "Can't view message"
     }
 
   return res.json({ message });
@@ -58,7 +59,8 @@ router.post('/', ensureLoggedIn, async function(req, res) {
     message = await Message.create({from_username, to_username, body});
   } catch (err) {
     console.log(err);
-    // throw new NotFoundError('Receipient not founnd.');
+    // throw new NotFoundError('Receipient not found.');
+    // TODO: ^ consider throwing this error
   }
 
   return res.json({ message });
@@ -78,6 +80,7 @@ router.post('/:id/read', ensureLoggedIn, async function(req, res){
 
   const currUser = res.locals.user;
   const unreadMessage = await Message.get(req.params.id);
+  // TODO: ^ can potentially be an already read message when entering route
 
   if (unreadMessage.to_user.username !== currUser.username) {
     throw new UnauthorizedError('Cannot mark message as read.');
