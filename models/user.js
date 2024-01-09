@@ -29,6 +29,7 @@ class User {
         ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
       RETURNING username, password, first_name, last_name, phone`,
       [username, hashedPassword, first_name, last_name, phone]
+      // TODO: ^ why does hashedPassword work but not firstName?
     );
 
     const user = results.rows[0];
