@@ -41,14 +41,15 @@ router.get('/:id', ensureLoggedIn, ensureCorrectUser, async function (req, res) 
 
 router.post('/', ensureLoggedIn, async function(req, res) {
 
-  const currUser = res.locals.user;
+  const from_username = res.locals.user.username;
   const { to_username, body } = req.body;
 
-  console.log('currUser.username=', currUser.username);
+  console.log('from_username=', from_username, 'to_username=,', to_username, "body=",body)
+
 
   let message;
   try {
-    message = await Message.create(currUser.username, to_username, body);
+    message = await Message.create({from_username, to_username, body});
   } catch (err) {
     console.log(err);
     // throw new NotFoundError('Receipient not founnd.');
