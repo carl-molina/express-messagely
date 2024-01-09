@@ -2,7 +2,7 @@
 
 const Router = require("express").Router;
 const router = new Router();
-const { Message, markRead } = require('../models/message');
+const Message= require('../models/message');
 const { ensureLoggedIn, ensureCorrectUser, ensureCorrectRecipient } = require('../middleware/auth');
 const { UnauthorizedError, NotFoundError } = require("../expressError");
 
@@ -39,14 +39,16 @@ router.get('/:id', ensureLoggedIn, ensureCorrectUser, async function (req, res) 
  *
  **/
 
-router.post('/', ensureLoggedIn, ensureCorrectUser, async function(req, res) {
+router.post('/', ensureLoggedIn, async function(req, res) {
 
   const currUser = res.locals.user;
   const { to_username, body } = req.body;
 
+  console.log('currUser.username=', currUser.username);
+
   let message;
   try {
-    message = Message.create(currUser.username, to_username, body);
+    message = await Message.create(currUser.username, to_username, body);
   } catch (err) {
     console.log(err);
     // throw new NotFoundError('Receipient not founnd.');
